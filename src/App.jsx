@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer"; // ✅ Import the footer
 import Home from "./pages/Home";
 import CategoryPage from "./pages/CategoryPage";
+import MovieDetail from "./pages/MovieDetail"; // ✅ Correct import
 
 function App() {
     return (
@@ -18,6 +19,9 @@ function App() {
                         {/* Dynamic category pages */}
                         <Route path="/:categoryName/:page" element={<CategoryPage />} />
                         <Route path="/:categoryName" element={<CategoryPage />} />
+
+                        {/* Movie detail page */}
+                        <Route path="/movie/:slugAndCategory" element={<MovieDetail />} />
                     </Routes>
                 </div>
 
