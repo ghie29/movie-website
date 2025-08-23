@@ -1,4 +1,8 @@
-export default function CategorySelector({ selected, onChange }) {
+import { useNavigate } from "react-router-dom";
+
+export default function CategorySelector({ selected }) {
+    const navigate = useNavigate();
+
     const categories = {
         1: "Censored",
         2: "Uncensored",
@@ -13,8 +17,10 @@ export default function CategorySelector({ selected, onChange }) {
             {Object.entries(categories).map(([key, name]) => (
                 <button
                     key={key}
-                    onClick={() => onChange(key)}
-                    className={`px-4 py-2 rounded ${selected == key ? "bg-yellow-500 text-black" : "bg-gray-700 text-white"
+                    onClick={() => navigate(`/${encodeURIComponent(name)}`)}
+                    className={`px-4 py-2 rounded ${selected == key
+                            ? "bg-yellow-500 text-black"
+                            : "bg-gray-700 text-white"
                         }`}
                 >
                     {name}
