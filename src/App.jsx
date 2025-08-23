@@ -8,7 +8,7 @@ function App() {
     return (
         <div className="bg-gray-900 min-h-screen text-white flex justify-center">
             {/* Container with max width 85% */}
-            <div className="w-full max-w-full xl:max-w-[100%]">
+            <div className="w-full max-w-full xl:max-w-[80%]">
                 <Header selectedCategory={category} onCategoryChange={setCategory} />
                 <Home category={category} />
             </div>
