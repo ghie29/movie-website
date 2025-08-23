@@ -1,6 +1,7 @@
 ﻿import { useState } from "react";
 import { HiMenu, HiX } from "react-icons/hi";
 import { FiSearch } from "react-icons/fi";
+import { FaUserCircle } from "react-icons/fa";
 
 export default function Header({
     selectedCategory,
@@ -45,16 +46,9 @@ export default function Header({
                         </button>
                     ))}
 
-                    {/* 🔍 Search Bar (desktop only) */}
-                    <div className="hidden md:flex items-center bg-gray-800 rounded-full overflow-hidden ml-4">
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => onSearchChange(e.target.value)}
-                            placeholder="Search by title or code..."
-                            className="px-3 py-2 bg-transparent text-white text-sm placeholder-gray-400 focus:outline-none"
-                        />
-                        <FiSearch className="mx-3 text-yellow-500" />
+                    {/* Avatar */}
+                    <div className="mx-2 text-yellow-500">
+                        <FaUserCircle size={28} />
                     </div>
                 </div>
 
@@ -73,17 +67,6 @@ export default function Header({
             {menuOpen && (
                 <div className="md:hidden bg-gray-900/95 shadow-inner 
                         px-6 pb-6 flex flex-col space-y-3 animate-slide-down">
-                    {/* Search (mobile) */}
-                    <div className="flex items-center bg-gray-800 rounded-full overflow-hidden">
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => onSearchChange(e.target.value)}
-                            placeholder="Search..."
-                            className="flex-1 px-3 py-2 bg-transparent text-white placeholder-gray-400 focus:outline-none"
-                        />
-                        <FiSearch className="mx-3 text-yellow-500" />
-                    </div>
 
                     {/* Categories (mobile) */}
                     {Object.entries(categories).map(([key, name]) => (

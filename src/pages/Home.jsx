@@ -71,9 +71,9 @@ export default function Home() {
 
             {/* 🎬 Movie Grid */}
             {loading ? (
-                <p className="text-center mt-10">Loading...</p>
+                <p className="text-center">Loading...</p>
             ) : displayedMovies.length > 0 ? (
-                <section className="p-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3 mt-6">
+                <section className="p-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3 mt-2">
                     {displayedMovies.map((movie) => (
                         <MovieCard
                             key={movie.vod_id || movie.id}
