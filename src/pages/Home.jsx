@@ -1,38 +1,54 @@
 ﻿import { useState } from "react";
 import { FiSearch } from "react-icons/fi";
-import useMovies from "../hooks/useMovies";
+import { useMovies, useAllMovies } from "../hooks/useMovies";
 import MovieCard from "../components/MovieCard";
+import Header from "../components/Header";
 
-export default function Home({ category }) {
-    const { movies, loading } = useMovies(category);
-    const [searchQuery, setSearchQuery] = useState(""); // ✅ Added search state
-    const displayedMovies = movies.slice(0, 24);
+export default function Home() {
+    const [selectedCategory, setSelectedCategory] = useState("all");
+    const [searchQuery, setSearchQuery] = useState("");
 
-    const handleSearch = (e) => {
-        e.preventDefault();
-        if (searchQuery.trim()) {
-            alert(`Searching for: ${searchQuery}`);
-            // 🚀 Replace with your real search logic
-        }
-    };
+    // ✅ Always call both hooks
+    const { movies: categoryMovies, loading: loadingCategory } = useMovies(
+        selectedCategory === "all" ? null : selectedCategory
+    );
+    const { allMovies, loading: loadingAll } = useAllMovies();
 
-    if (loading) {
-        return <p className="text-center mt-10">Loading...</p>;
-    }
+    // ✅ Decide dataset
+    const baseMovies = selectedCategory === "all" ? allMovies : categoryMovies;
 
-    // Take top 5 movies for hero/featured slider if needed
-    const featuredMovies = displayedMovies.slice(0, 5);
+    // ✅ Apply search
+    const filteredMovies = baseMovies.filter(
+        (movie) =>
+            movie.vod_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            movie.vod_id?.toString().includes(searchQuery.toLowerCase())
+    );
+
+    // ✅ Slice to 24 (your preferred)
+    const displayedMovies = filteredMovies.slice(0, 24);
+
+    // ✅ Handle loading state
+    const loading =
+        selectedCategory === "all" ? loadingAll : loadingCategory;
 
     return (
         <div className="space-y-10">
+            {/* 🌟 Header with category + search connected */}
+            <Header
+                selectedCategory={selectedCategory}
+                onCategoryChange={(cat) => setSelectedCategory(cat)}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+            />
+
             {/* 🔍 Premium Search Bar */}
-            <div className="mt-20">
+            <div className="pt-10">   {/* ⬅ bumped from mt-20 to mt-36 */}
                 <div className="max-w-2xl mx-auto px-6 py-6 text-center">
                     <h2 className="text-xl md:text-2xl font-semibold mb-4 tracking-wide">
                         Search any <span className="text-yellow-500">Japan AV</span>
                     </h2>
                     <form
-                        onSubmit={handleSearch}
+                        onSubmit={(e) => e.preventDefault()}
                         className="flex items-center bg-gray-800 rounded-full shadow-lg overflow-hidden"
                     >
                         <input
@@ -52,23 +68,33 @@ export default function Home({ category }) {
                 </div>
             </div>
 
+
             {/* 🎬 Movie Grid */}
-            <section className="p-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3 mt-6">
-                {displayedMovies.map((movie) => (
-                    <MovieCard
-                        key={movie.vod_id || movie.id}
-                        movie={{
-                            title: movie.vod_name,
-                            poster: movie.vod_pic,
-                        }}
-                    />
-                ))}
-            </section>
+            {loading ? (
+                <p className="text-center mt-10">Loading...</p>
+            ) : displayedMovies.length > 0 ? (
+                <section className="p-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3 mt-6">
+                    {displayedMovies.map((movie) => (
+                        <MovieCard
+                            key={movie.vod_id || movie.id}
+                            movie={{
+                                title: movie.vod_name,
+                                poster: movie.vod_pic,
+                            }}
+                        />
+                    ))}
+                </section>
+            ) : (
+                <p className="text-center text-gray-400 mt-6">
+                    No results found for{" "}
+                    <span className="text-yellow-500">{searchQuery}</span>
+                </p>
+            )}
         </div>
     );
 }
 
-// Helper function for category names
+// Helper function (kept for later use if you want pretty labels)
 function getCategoryName(category) {
     const categories = {
         1: "Censored",
@@ -78,5 +104,5 @@ function getCategoryName(category) {
         5: "Chinese AV",
         7: "English Sub",
     };
-    return categories[category] || "Unknown";
+    return categories[category] || "All";
 }
