@@ -1,5 +1,17 @@
 ﻿import { useState, useEffect } from "react";
 
+// 🔹 Normalize movie object (adds slug + cleans data)
+function normalizeMovie(movie) {
+    return {
+        ...movie,
+        slug: movie.movie_code
+            ? movie.movie_code.toLowerCase()
+            : String(movie.vod_id), // fallback to vod_id if no movie_code
+        title: movie.vod_name || "Untitled",
+        poster: movie.vod_pic || import.meta.env.VITE_POSTER_FALLBACK,
+    };
+}
+
 // 🔹 Helper function: fetch movies with pagination
 async function fetchMoviesByCategory(category = 1, page = 1, pageSize = 24) {
     const res = await fetch(
@@ -7,8 +19,10 @@ async function fetchMoviesByCategory(category = 1, page = 1, pageSize = 24) {
     );
     const data = await res.json();
 
+    const normalized = (data.list || []).map(normalizeMovie);
+
     return {
-        movies: data.list || [],
+        movies: normalized,
         hasMore: data.page < data.pagecount, // true if more pages exist
         pageCount: data.pagecount || 1,      // total available pages
         currentPage: data.page || page,      // current page (API may return it)
@@ -74,6 +88,7 @@ export function useAllMovies(pageSize = 24) {
                 );
 
                 if (!cancelled) {
+                    // flatten & normalize
                     setAllMovies(results.map((r) => r.movies).flat());
                 }
             } catch (err) {

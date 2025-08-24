@@ -7,7 +7,6 @@ import { Link } from "react-router-dom";
 export default function Home() {
     const [searchQuery, setSearchQuery] = useState("");
 
-    // categories now include both name + slug
     const categories = {
         1: { name: "Censored", slug: "Censored" },
         2: { name: "Uncensored", slug: "Uncensored" },
@@ -17,19 +16,16 @@ export default function Home() {
         7: { name: "English Sub", slug: "English-Sub" },
     };
 
-    // fetch all movies (only needed if searching)
     const { allMovies = [], loading: loadingAll } = useAllMovies();
 
-    // filter globally if search is active
     const globalFiltered = allMovies.filter(
         (movie) =>
             movie.vod_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            movie.vod_id?.toString().includes(searchQuery.toLowerCase())
+            (movie.movie_code?.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
     return (
         <div className="space-y-10">
-            {/* Fixed Header */}
             <Header />
 
             <div className="pt-8 px-6">
@@ -58,7 +54,7 @@ export default function Home() {
                     </form>
                 </div>
 
-                {/* If searching: show global results */}
+                {/* Search Results */}
                 {searchQuery ? (
                     <div className="mb-10">
                         <h3 className="text-lg md:text-xl font-semibold text-yellow-500 mb-3">
@@ -70,8 +66,12 @@ export default function Home() {
                             <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                                 {globalFiltered.slice(0, 24).map((movie) => (
                                     <MovieCard
-                                        key={movie.vod_id ?? movie.id}
-                                        movie={{ title: movie.vod_name, poster: movie.vod_pic }}
+                                        key={movie.movie_code}
+                                        movie={{
+                                            vod_name: movie.vod_name,
+                                            vod_pic: movie.vod_pic,
+                                            slug: movie.movie_code || movie.vod_remarks,
+                                        }}
                                     />
                                 ))}
                             </section>
@@ -80,14 +80,13 @@ export default function Home() {
                         )}
                     </div>
                 ) : (
-                    // Otherwise: show per-category previews
+                    // Category Previews
                     Object.entries(categories).map(([key, { name, slug }]) => {
                         const { movies = [], loading } = useMovies(key);
                         const displayedMovies = movies.slice(0, 4);
 
                         return (
                             <div key={key} className="mb-10">
-                                {/* Category Header */}
                                 <div className="flex items-center justify-between mb-3">
                                     <h3 className="text-lg md:text-xl font-semibold text-yellow-500">
                                         <Link to={`/${slug}`} className="hover:text-yellow-400 transition">
@@ -102,15 +101,18 @@ export default function Home() {
                                     </Link>
                                 </div>
 
-                                {/* Movie Cards */}
                                 {loading ? (
                                     <p>Loading...</p>
                                 ) : displayedMovies.length > 0 ? (
                                     <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                                         {displayedMovies.map((movie) => (
                                             <MovieCard
-                                                key={movie.vod_id ?? movie.id}
-                                                movie={{ title: movie.vod_name, poster: movie.vod_pic }}
+                                                key={movie.movie_code || movie.vod_id}
+                                                movie={{
+                                                    vod_name: movie.vod_name,
+                                                    vod_pic: movie.vod_pic,
+                                                    slug: movie.movie_code || movie.vod_remarks,
+                                                }}
                                             />
                                         ))}
                                     </section>

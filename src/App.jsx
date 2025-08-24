@@ -1,9 +1,9 @@
 ﻿import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
-import Footer from "./components/Footer"; // ✅ Import the footer
+import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import CategoryPage from "./pages/CategoryPage";
-import MovieDetail from "./pages/MovieDetail"; // ✅ Correct import
+import MovieDetail from "./pages/MovieDetail";
 
 function App() {
     return (
@@ -20,12 +20,11 @@ function App() {
                         <Route path="/:categoryName/:page" element={<CategoryPage />} />
                         <Route path="/:categoryName" element={<CategoryPage />} />
 
-                        {/* Movie detail page */}
-                        <Route path="/movie/:slugAndCategory" element={<MovieDetail />} />
+                        {/* Movie detail page (use slug instead of id) */}
+                        <Route path="/:slug" element={<MovieDetail />} />
                     </Routes>
                 </div>
 
-                {/* ✅ Premium Footer */}
                 <Footer />
             </div>
         </Router>

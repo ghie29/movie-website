@@ -2,36 +2,81 @@
 import { useEffect, useState } from "react";
 
 export default function MovieDetail() {
-    const { slugAndCategory } = useParams();
+    const { slug } = useParams(); // matches /:slug
     const navigate = useNavigate();
     const [movie, setMovie] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // URL format: id-typeName
-    const [id, category] = slugAndCategory.split("-");
+    const categories = [1, 2, 3, 4, 5, 7]; // your categories
 
     useEffect(() => {
         async function fetchMovie() {
+            setLoading(true);
             try {
-                const res = await fetch(
-                    `https://avdbapi.com/api.php/provide/vod?ac=detail&ids=${id}`
-                );
-                const data = await res.json();
-                setMovie(data.list?.[0] || null);
+                let foundMovie = null;
+
+                // Search each category until we find the movie
+                for (const cat of categories) {
+                    const res = await fetch(
+                        `https://avdbapi.com/api.php/provide1/vod?ac=detail&t=${cat}`
+                    );
+                    const data = await res.json();
+
+                    if (data.list) {
+                        foundMovie = data.list.find(
+                            (m) => m.movie_code?.toLowerCase() === slug.toLowerCase()
+                        );
+                        if (foundMovie) break;
+                    }
+                }
+
+                if (foundMovie) {
+                    setMovie({
+                        title: foundMovie.vod_name || slug,
+                        movie_code: foundMovie.movie_code,
+                        link_embed:
+                            foundMovie.episodes?.server_data?.Full?.link_embed ||
+                            `https://upload18.com/play/index/${foundMovie.movie_code}`,
+                        description: foundMovie.vod_blurb || "No description available",
+                        year: foundMovie.vod_year || "Unknown",
+                        actors: Array.isArray(foundMovie.actor) ? foundMovie.actor : [],
+                        directors: Array.isArray(foundMovie.director)
+                            ? foundMovie.director
+                            : [],
+                    });
+                } else {
+                    // fallback if not found
+                    setMovie({
+                        title: slug,
+                        movie_code: slug,
+                        link_embed: `https://upload18.com/play/index/${slug}`,
+                        actors: [],
+                        directors: [],
+                        description: "No description available",
+                        year: "Unknown",
+                    });
+                }
             } catch (err) {
                 console.error(err);
+                setMovie({
+                    title: slug,
+                    movie_code: slug,
+                    link_embed: `https://upload18.com/play/index/${slug}`,
+                    actors: [],
+                    directors: [],
+                    description: "No description available",
+                    year: "Unknown",
+                });
             } finally {
                 setLoading(false);
             }
         }
-        if (id) fetchMovie();
-    }, [id]);
+
+        if (slug) fetchMovie();
+    }, [slug]);
 
     if (loading) return <p className="text-center mt-20">Loading...</p>;
     if (!movie) return <p className="text-center mt-20">Movie not found.</p>;
-
-    // Extract video link
-    const videoUrl = movie.episodes?.server_data?.Full?.link_embed;
 
     return (
         <div className="px-4 md:px-8 lg:px-16 py-8">
@@ -42,46 +87,36 @@ export default function MovieDetail() {
                 ← Back
             </button>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Poster */}
-                <div className="col-span-1">
-                    <img
-                        src={movie.poster_url}
-                        alt={movie.name}
-                        className="rounded-xl shadow-lg w-full object-cover"
-                    />
-                </div>
-
-                {/* Details */}
-                <div className="col-span-2 space-y-4">
-                    <h1 className="text-2xl md:text-4xl font-bold text-yellow-400">
-                        {movie.name}
-                    </h1>
-                    <p className="text-gray-300">{movie.description || "No description."}</p>
-
-                    <div className="text-sm text-gray-400 space-y-1">
-                        <p><span className="text-yellow-500">Code:</span> {movie.movie_code}</p>
-                        <p><span className="text-yellow-500">Type:</span> {movie.type_name}</p>
-                        <p><span className="text-yellow-500">Year:</span> {movie.year}</p>
-                        <p><span className="text-yellow-500">Actors:</span> {movie.actor?.join(", ")}</p>
-                        <p><span className="text-yellow-500">Director:</span> {movie.director?.join(", ")}</p>
-                    </div>
-
-                    {/* Player */}
-                    <div className="mt-6">
-                        <h2 className="text-xl font-semibold mb-2">Player</h2>
-                        {videoUrl ? (
-                            <iframe
-                                src={videoUrl}
-                                className="w-full h-[400px] rounded-xl shadow-lg"
-                                allowFullScreen
-                            ></iframe>
-                        ) : (
-                            <p className="text-gray-400">No video available.</p>
-                        )}
-                    </div>
-                </div>
+            <div className="w-full relative" style={{ paddingTop: "56.25%" }}>
+                <iframe
+                    src={movie.link_embed}
+                    className="absolute top-0 left-0 w-full h-full rounded-xl shadow-lg"
+                    allowFullScreen
+                />
             </div>
+
+            <h1 className="mt-4 text-2xl font-bold text-yellow-400">
+                {movie.title}{" "}
+                <span className="text-gray-400 text-sm">({movie.movie_code})</span>
+            </h1>
+
+            <p className="text-gray-300 mt-2">{movie.description}</p>
+
+            {movie.actors.length > 0 && (
+                <p className="text-gray-400 mt-1">
+                    <strong>Actors:</strong> {movie.actors.join(", ")}
+                </p>
+            )}
+
+            {movie.directors.length > 0 && (
+                <p className="text-gray-400 mt-1">
+                    <strong>Directors:</strong> {movie.directors.join(", ")}
+                </p>
+            )}
+
+            <p className="text-gray-400 mt-1">
+                <strong>Year:</strong> {movie.year}
+            </p>
         </div>
     );
 }

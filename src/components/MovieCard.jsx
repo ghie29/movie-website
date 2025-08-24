@@ -1,25 +1,26 @@
 ﻿import { Link } from "react-router-dom";
 
 export default function MovieCard({ movie }) {
-    const movieUrl = `/movie/${movie.slug}-${encodeURIComponent(movie.type_name)}`;
+    // Always use slug from movie_code, fallback to vod_remarks if missing
+    const slug = (movie.slug || movie.vod_remarks || movie.vod_id)
+        .toString()
+        .toLowerCase();
 
     return (
-        <Link to={movieUrl} className="block">
-            <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                {/* Movie Poster with fixed 16:9 aspect ratio */}
-                <div className="w-full relative" style={{ paddingTop: '56.25%' }}>
-                    <img
-                        src={movie.poster}
-                        alt={movie.title}
-                        loading="lazy"
-                        className="absolute top-0 left-0 w-full h-full object-cover"
-                    />
-                </div>
-
-                {/* Movie Title */}
-                <div className="p-3">
-                    <h3 className="text-left text-sm font-semibold text-white line-clamp-2">
-                        {movie.title}
+        <Link to={`/${slug}`}>
+            <div className="bg-gray-900 rounded-lg overflow-hidden shadow-lg hover:scale-105 transition">
+                <img
+                    src={movie.vod_pic}
+                    alt={movie.vod_name}
+                    className="w-full h-64 object-cover"
+                    loading="lazy"
+                    onError={(e) => {
+                        e.currentTarget.src = import.meta.env.VITE_POSTER_FALLBACK;
+                    }}
+                />
+                <div className="p-3 text-center">
+                    <h3 className="text-sm font-semibold text-gray-200 truncate">
+                        {movie.vod_name}
                     </h3>
                 </div>
             </div>

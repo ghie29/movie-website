@@ -282,14 +282,18 @@ export default function CategoryPage() {
                     <p className="text-center">Loading...</p>
                 ) : filteredMovies.length > 0 ? (
                     <>
-                        <section className="p-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mt-2">
-                            {filteredMovies.map((movie) => (
-                                <MovieCard
-                                    key={movie.vod_id ?? movie.id}
-                                    movie={{ title: movie.vod_name, poster: movie.vod_pic }}
-                                />
-                            ))}
-                        </section>
+                            <section className="p-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mt-2">
+                                {filteredMovies.map((movie) => (
+                                    <MovieCard
+                                        key={movie.movie_code || movie.vod_id}
+                                        movie={{
+                                            vod_name: movie.vod_name,
+                                            vod_pic: movie.vod_pic,
+                                            slug: movie.movie_code || movie.vod_remarks, // ✅ use movie_code for URL
+                                        }}
+                                    />
+                                ))}
+                            </section>
 
                         {/* Pagination */}
                         {renderPagination()}
